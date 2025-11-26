@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Sistema de Gestión</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        html {
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 640px) {
+            body {
+                padding: 0.5rem;
+            }
+
+            .login-container {
+                margin: 0.5rem;
+                padding: 1.5rem;
+                max-width: none;
+                width: calc(100vw - 1rem);
+            }
+
+            .floating-shapes .shape {
+                display: none;
+            }
+
+            .login-container h1 {
+                font-size: 1.75rem;
+            }
+
+            .login-container p {
+                font-size: 0.875rem;
+            }
+
+            .input-field {
+                font-size: 16px;
+            }
+
+            .btn-login {
+                font-size: 1rem;
+                padding: 0.875rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 1rem;
+                margin: 0.25rem;
+                width: calc(100vw - 0.5rem);
+            }
+
+            .login-container h1 {
+                font-size: 1.5rem;
+            }
+
+            .login-container .text-sm {
+                font-size: 0.75rem;
+            }
+
+            .input-field {
+                padding: 0.75rem 1rem 0.75rem 3rem;
+            }
+
+            .btn-login {
+                padding: 0.75rem;
+            }
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 28rem;
+            width: 100%;
+        }
+
+        .input-field {
+            transition: all 0.3s ease;
+        }
+
+        .input-field:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-login {
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
+            transition: all 0.3s ease;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(124, 58, 237, 0.4);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .shape {
+            position: absolute;
+            opacity: 0.1;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hide scrollbar on mobile */
+        @media (max-width: 640px) {
+            body {
+                overflow-x: hidden;
+            }
+        }
+
+        /* Improve touch targets on mobile */
+        @media (max-width: 640px) {
+            button, .input-field, a {
+                min-height: 44px;
+            }
+
+            #toggle-password {
+                min-width: 44px;
+                min-height: 44px;
+            }
+        }
+
+        /* Better focus states for accessibility */
+        .input-field:focus {
+            outline: none;
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        /* Loading state improvements */
+        .btn-login:disabled {
+            pointer-events: none;
+        }
+
+        /* Error message improvements */
+        #login-message {
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        /* Prevent horizontal scroll */
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Better image loading */
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Fallback for older browsers */
+        @supports not (backdrop-filter: blur(10px)) {
+            .login-container {
+                background: rgba(255, 255, 255, 0.98);
+            }
+        }
+    </style>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-blue': '#001749',
+                        'brand-orange': '#e48410',
+                        'brand-light-blue': '#3787c6',
+                        'brand-accent-blue': '#015cd0',
+                        'brand-purple': '#7c3aed',
+                        'brand-purple-dark': '#6d28d9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+    <!-- Floating Shapes Background -->
+    <div class="floating-shapes">
+        <div class="shape w-32 h-32 bg-white rounded-full"></div>
+        <div class="shape w-24 h-24 bg-purple-200 rounded-lg rotate-45"></div>
+        <div class="shape w-20 h-20 bg-blue-200 rounded-full"></div>
+    </div>
+
+    <!-- Login Container -->
+    <div class="login-container rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md fade-in">
+        <!-- Logo and Title -->
+        <div class="text-center mb-6 sm:mb-8">
+            <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png"
+                 alt="Tupak Rantina Logo"
+                 class="h-16 sm:h-20 w-auto mx-auto mb-4 sm:mb-6 drop-shadow-lg">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Sistema de Gestión</h1>
+            <p class="text-gray-600 text-xs sm:text-sm">Caja de Ahorro y Crédito Tupak Rantina</p>
+            <div class="w-12 sm:w-16 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto mt-3 sm:mt-4 rounded-full"></div>
+        </div>
+
+        <!-- Login Form -->
+        <form id="login-form" class="space-y-4 sm:space-y-6">
+            <!-- Email Field -->
+            <div class="space-y-2">
+                <label for="email" class="block text-sm font-semibold text-gray-700">
+                    <i class="fas fa-envelope mr-2 text-purple-600"></i>Correo Electrónico
+                </label>
+                <div class="relative">
+                    <input type="email" id="email" name="email" required
+                           class="input-field w-full px-4 py-3 pl-10 sm:pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
+                           placeholder="tu@email.com">
+                    <i class="fas fa-envelope absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
+                </div>
+            </div>
+
+            <!-- Password Field -->
+            <div class="space-y-2">
+                <label for="password" class="block text-sm font-semibold text-gray-700">
+                    <i class="fas fa-lock mr-2 text-purple-600"></i>Contraseña
+                </label>
+                <div class="relative">
+                    <input type="password" id="password" name="password" required
+                           class="input-field w-full px-4 py-3 pl-10 sm:pl-12 pr-10 sm:pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
+                           placeholder="••••••••">
+                    <i class="fas fa-lock absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
+                    <button type="button" id="toggle-password" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                        <i class="fas fa-eye text-sm sm:text-base"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember" name="remember"
+                           class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                    <label for="remember" class="ml-2 block text-sm text-gray-700">
+                        Recordarme
+                    </label>
+                </div>
+                <a href="#" class="text-sm text-purple-600 hover:text-purple-800 font-medium text-center sm:text-left">
+                    ¿Olvidaste tu contraseña?
+                </a>
+            </div>
+
+            <!-- Login Button -->
+            <button type="submit" id="login-btn"
+                    class="btn-login w-full py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 flex items-center justify-center min-h-[44px]">
+                <span id="login-text">
+                    <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
+                </span>
+                <i id="login-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+            </button>
+        </form>
+
+        <!-- Status Messages -->
+        <div id="login-message" class="mt-4 sm:mt-6 text-center hidden">
+            <div class="flex items-center justify-center space-x-2 px-2">
+                <i class="fas fa-info-circle text-sm sm:text-base"></i>
+                <span class="text-xs sm:text-sm"></span>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="mt-6 sm:mt-8 text-center">
+            <p class="text-xs text-gray-500">
+                Sistema seguro de autenticación
+                <i class="fas fa-shield-alt ml-1 text-green-500"></i>
+            </p>
+            <p class="text-xs text-gray-400 mt-2 hidden sm:block">
+                Versión 1.0.0
+            </p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // ===== CONFIGURACIÓN SUPABASE =====
+        const SUPABASE_URL = 'https://lpsupabase.luispinta.com';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.bZRDLg2HoJKCXPp_B6BD5s-qcZM6-NrKO8qtxBtFGTk';
+
+        // Crear instancia de Supabase
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            auth: { persistSession: true, autoRefreshToken: true }
+        });
+
+        // ===== FUNCIONES DE UTILIDAD =====
+        function showMessage(message, type = 'info') {
+            const messageEl = document.getElementById('login-message');
+            const messageText = messageEl.querySelector('span');
+            const messageIcon = messageEl.querySelector('i');
+
+            messageText.textContent = message;
+
+            // Reset classes
+            messageEl.className = 'mt-4 sm:mt-6 text-center flex items-center justify-center space-x-2 px-2';
+
+            if (type === 'success') {
+                messageEl.classList.add('text-green-600');
+                messageIcon.className = 'fas fa-check-circle text-sm sm:text-base';
+            } else if (type === 'error') {
+                messageEl.classList.add('text-red-600');
+                messageIcon.className = 'fas fa-exclamation-circle text-sm sm:text-base';
+            } else {
+                messageEl.classList.add('text-purple-600');
+                messageIcon.className = 'fas fa-info-circle text-sm sm:text-base';
+            }
+
+            messageEl.classList.remove('hidden');
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageEl.classList.add('hidden');
+            }, 5000);
+        }
+
+        function setLoading(loading) {
+            const loginText = document.getElementById('login-text');
+            const loginSpinner = document.getElementById('login-spinner');
+            const loginBtn = document.getElementById('login-btn');
+
+            if (loading) {
+                loginText.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Iniciando...';
+                loginSpinner.classList.add('hidden');
+                loginBtn.disabled = true;
+                loginBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            } else {
+                loginText.innerHTML = '<i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión';
+                loginSpinner.classList.add('hidden');
+                loginBtn.disabled = false;
+                loginBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            }
+        }
+
+        // ===== DETECTAR DISPOSITIVO MÓVIL =====
+        function isMobile() {
+            return window.innerWidth <= 768 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        }
+
+        // ===== MEJORAR EXPERIENCIA EN MÓVIL =====
+        function setupMobileOptimizations() {
+            if (isMobile()) {
+                const inputs = document.querySelectorAll('input[type="email"], input[type="password"]');
+                inputs.forEach(input => {
+                    input.setAttribute('inputmode', 'email');
+                    if (input.type === 'password') {
+                        input.setAttribute('inputmode', 'text');
+                    }
+                });
+
+                document.body.style.overscrollBehavior = 'none';
+
+                const floatingShapes = document.querySelector('.floating-shapes');
+                if (floatingShapes) {
+                    floatingShapes.style.display = 'none';
+                }
+
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            }
+        }
+
+        // ===== FUNCIONES DE LOGIN =====
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const remember = document.getElementById('remember').checked;
+
+            setLoading(true);
+
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email: email,
+                    password: password
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // 2. Verificación secundaria en tabla docsuserstr
+                const { data: userData, error: userError } = await supabase
+                    .from('docsuserstr')
+                    .select('*')
+                    .eq('correo', email)
+                    .single();
+
+                if (userError) {
+                    console.error('Error fetching user details:', userError);
+                    throw new Error('No se pudo verificar la información del usuario.');
+                }
+
+                if (!userData) {
+                    throw new Error('Usuario no registrado en el sistema de gestión.');
+                }
+
+                if (!userData.activo) {
+                    throw new Error('Tu cuenta está desactivada. Contacta al administrador.');
+                }
+
+                // 3. Guardar información en localStorage
+                localStorage.setItem('gestion_user_name', userData.nombre);
+                localStorage.setItem('gestion_user_roles', userData.rol || ''); // Guardar roles separados por coma
+                
+                // Guardar preferencia de recordar
+                if (remember) {
+                    localStorage.setItem('gestion_remember_me', 'true');
+                }
+
+                showMessage('¡Inicio de sesión exitoso! Redirigiendo...', 'success');
+
+                // Redirigir a la aplicación principal después de un breve delay
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error en login:', error);
+                let errorMessage = 'Error al iniciar sesión';
+
+                if (error.message.includes('Invalid login credentials')) {
+                    errorMessage = 'Credenciales incorrectas. Verifica tu email y contraseña.';
+                } else if (error.message.includes('Email not confirmed')) {
+                    errorMessage = 'Por favor confirma tu email antes de iniciar sesión.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+
+                showMessage(errorMessage, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // ===== TOGGLE PASSWORD VISIBILITY =====
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleBtn = document.getElementById('toggle-password');
+            const icon = toggleBtn.querySelector('i');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordInput.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // ===== VERIFICAR SI YA ESTÁ AUTENTICADO =====
+        async function checkExistingSession() {
+            try {
+                const { data: { user }, error } = await supabase.auth.getUser();
+
+                if (user && !error) {
+                    showMessage('Ya tienes una sesión activa. Redirigiendo...', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 1500);
+                }
+            } catch (error) {
+                console.log('No hay sesión activa');
+            }
+        }
+
+        // ===== EVENT LISTENERS =====
+        document.addEventListener('DOMContentLoaded', () => {
+            setupMobileOptimizations();
+            checkExistingSession();
+
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('toggle-password').addEventListener('click', togglePasswordVisibility);
+
+            if (!isMobile()) {
+                setTimeout(() => {
+                    const emailInput = document.getElementById('email');
+                    if (emailInput) emailInput.focus();
+                }, 500);
+            }
+        });
+
+        // ===== ESCUCHAR CAMBIOS DE AUTENTICACIÓN =====
+        supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN') {
+                showMessage('¡Bienvenido! Redirigiendo a la aplicación...', 'success');
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1500);
+            }
+        });
+    </script>
+</body>
+</html>

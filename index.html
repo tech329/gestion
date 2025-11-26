@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestión - Caja de Ahorro y Crédito Tupak Rantina</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        html {
+            scrollbar-gutter: stable;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .loading-brand {
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        /* Hide main content initially */
+        #app {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #app.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Modern scrollbar design */
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
+            border-radius: 8px;
+            border: 2px solid #f8fafc;
+            box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
+            box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
+            transform: scale(1.1);
+        }
+        
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
+            box-shadow: 0 6px 12px rgba(167, 139, 250, 0.5);
+        }
+        
+        ::-webkit-scrollbar-corner {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 0 0 8px 0;
+        }
+        
+        /* Firefox modern scrollbar */
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: #7c3aed #f8fafc;
+        }
+        
+        /* Enhanced scrollbar for mobile */
+        @media (max-width: 640px) {
+            ::-webkit-scrollbar {
+                width: 6px;
+                height: 6px;
+            }
+            ::-webkit-scrollbar-thumb {
+                border: 1px solid #f8fafc;
+            }
+            * {
+                scrollbar-width: thin;
+            }
+        }
+
+        /* Tab styles */
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .tab-button {
+            padding: 8px 16px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: #6b7280;
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s;
+        }
+        .tab-button.active {
+            color: #7c3aed;
+            border-bottom-color: #7c3aed;
+        }
+        .tab-button:hover {
+            color: #7c3aed;
+        }
+        
+        /* Mobile tab styles */
+        .mobile-tab-button {
+            color: #374151;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .mobile-tab-button:hover {
+            color: #7c3aed;
+            background-color: #f9fafb;
+        }
+        .mobile-tab-button.active {
+            color: #7c3aed;
+            background-color: #f3e8ff;
+        }
+
+        .tab-content {
+            display: none;
+            width: 100%;
+            transition: opacity 0.3s ease-in-out;
+        }
+        .tab-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Development module card */
+        .dev-module-card {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 2px dashed #7c3aed;
+            transition: all 0.3s ease;
+        }
+
+        .dev-module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-blue': '#001749',
+                        'brand-orange': '#e48410',
+                        'brand-light-blue': '#3787c6',
+                        'brand-accent-blue': '#015cd0',
+                        'brand-purple': '#7c3aed',
+                        'brand-purple-dark': '#6d28d9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="display: flex;">
+        <div class="text-center">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Verificando sesión...</div>
+            <div class="loading-brand">Sistema de Gestión</div>
+        </div>
+    </div>
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-900 via-purple-900 to-purple-800 text-white py-6 px-6 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4 ml-[5%] transition-all duration-300 ease-in-out">
+                        <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png" 
+                             alt="Tupak Rantina Logo" 
+                             class="h-12 md:h-16 w-auto transition-all duration-300 ease-in-out">
+                        <div class="text-left">
+                            <h1 class="text-xl md:text-2xl font-bold transition-all duration-300 ease-in-out">Sistema de Gestión</h1>
+                            <p class="text-gray-300 text-xs md:text-sm transition-all duration-300 ease-in-out">Menú Principal</p>
+                        </div>
+                    </div>
+                    
+                    <!-- User Info and Logout -->
+                    <div class="flex items-center space-x-4">
+                        <div class="text-right hidden md:block">
+                            <div class="text-sm text-gray-300">Bienvenido</div>
+                            <div id="user-info" class="font-semibold">Usuario</div>
+                        </div>
+                        <div id="logout-btn" class="hidden">
+                            <!-- Logout button will be added by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard Content -->
+        <main class="flex-grow py-10 px-4 bg-gray-50">
+            <div class="max-w-7xl mx-auto">
+                <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center">Seleccione un Módulo</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    
+                    <!-- Módulo Cuentas -->
+                    <div id="module-cuentas" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='cuentas.html'">
+                        <div class="bg-gradient-to-r from-purple-600 to-purple-800 p-6 flex justify-center items-center h-40">
+                            <i class="fas fa-wallet text-6xl text-white opacity-90"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Cuentas</h3>
+                            <p class="text-gray-600 text-sm mb-4">Gestión de cuentas de ahorro, créditos y movimientos financieros.</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <i class="fas fa-arrow-right text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Módulo Pagarés -->
+                    <div id="module-pagares" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='pagares.html'">
+                        <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 flex justify-center items-center h-40">
+                            <i class="fas fa-file-contract text-6xl text-white opacity-90"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Pagarés</h3>
+                            <p class="text-gray-600 text-sm mb-4">Administración de documentos legales, pagarés y garantías.</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo Admin</span>
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Módulo Créditos -->
+                    <div id="module-creditos" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='creditos.html'">
+                        <div class="bg-gradient-to-r from-green-600 to-green-800 p-6 flex justify-center items-center h-40">
+                            <i class="fas fa-hand-holding-usd text-6xl text-white opacity-90"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Créditos</h3>
+                            <p class="text-gray-600 text-sm mb-4">Gestión de solicitudes y aprobaciones de créditos.</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <i class="fas fa-arrow-right text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Módulo Admin (Solo visible para admin) -->
+                    <div id="module-admin" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden">
+                        <div class="bg-gradient-to-r from-gray-700 to-gray-900 p-6 flex justify-center items-center h-40">
+                            <i class="fas fa-cogs text-6xl text-white opacity-90"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">Administración</h3>
+                            <p class="text-gray-600 text-sm mb-4">Configuración del sistema, usuarios y permisos globales.</p>
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo Admin</span>
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Mensaje si no hay módulos disponibles -->
+                <div id="no-modules" class="hidden text-center py-12">
+                    <i class="fas fa-exclamation-circle text-4xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600">No tienes acceso a ningún módulo. Contacta al administrador.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Esperar a que main.js inicialice
+            setTimeout(() => {
+                if (!window.GestionAuth.isAuthenticated()) return;
+
+                const hasCuentas = window.GestionAuth.checkAccess(['cuentas']);
+                const hasAsesor = window.GestionAuth.checkAccess(['asesor']);
+                const isAdmin = window.GestionAuth.checkAccess(['admin']);
+
+                const cuentasModule = document.getElementById('module-cuentas');
+                const pagaresModule = document.getElementById('module-pagares');
+                const creditosModule = document.getElementById('module-creditos');
+                const adminModule = document.getElementById('module-admin');
+                const noModules = document.getElementById('no-modules');
+
+                let anyVisible = false;
+
+                if (hasCuentas || isAdmin) {
+                    cuentasModule.classList.remove('hidden');
+                    anyVisible = true;
+                }
+
+                if (isAdmin) {
+                    pagaresModule.classList.remove('hidden');
+                    anyVisible = true;
+                }
+
+                if (hasAsesor || isAdmin) {
+                    creditosModule.classList.remove('hidden');
+                    anyVisible = true;
+                }
+
+                if (isAdmin) {
+                    adminModule.classList.remove('hidden');
+                    anyVisible = true;
+                }
+
+                if (!anyVisible) {
+                    noModules.classList.remove('hidden');
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>

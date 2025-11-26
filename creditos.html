@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Créditos - Sistema de Gestión</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- Custom Styles -->
+    <style>
+        html {
+            scrollbar-gutter: stable;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Loading Screen */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(135deg, #1e3a8a 0%, #7c3aed 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            margin: 0;
+            padding: 0;
+        }
+
+        #loading-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #ffffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .loading-brand {
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 0.5rem;
+        }
+
+        /* Hide main content initially */
+        #app {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #app.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Development module card */
+        .dev-module-card {
+            background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+            border: 2px dashed #7c3aed;
+            transition: all 0.3s ease;
+        }
+
+        .dev-module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(124, 58, 237, 0.2);
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'brand-dark-blue': '#001749',
+                        'brand-orange': '#e48410',
+                        'brand-light-blue': '#3787c6',
+                        'brand-accent-blue': '#015cd0',
+                        'brand-purple': '#7c3aed',
+                        'brand-purple-dark': '#6d28d9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-100 antialiased">
+
+    <!-- Loading Screen -->
+    <div id="loading-screen" style="display: flex;">
+        <div class="text-center">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Verificando acceso...</div>
+            <div class="loading-brand">Sistema de Gestión</div>
+        </div>
+    </div>
+
+    <div id="app" class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gradient-to-r from-blue-900 via-purple-900 to-purple-800 text-white py-6 px-6 shadow-lg">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4 ml-[5%] transition-all duration-300 ease-in-out cursor-pointer" onclick="window.location.href='index.html'">
+                        <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png" 
+                             alt="Tupak Rantina Logo" 
+                             class="h-12 md:h-16 w-auto transition-all duration-300 ease-in-out">
+                        <div class="text-left">
+                            <h1 class="text-xl md:text-2xl font-bold transition-all duration-300 ease-in-out">Sistema de Gestión</h1>
+                            <p class="text-gray-300 text-xs md:text-sm transition-all duration-300 ease-in-out">Módulo de Créditos</p>
+                        </div>
+                    </div>
+                    
+                    <!-- User Info and Logout -->
+                    <div class="flex items-center space-x-4">
+                        <button onclick="window.location.href='index.html'" class="text-sm text-gray-300 hover:text-white mr-4">
+                            <i class="fas fa-arrow-left mr-1"></i> Volver al Menú
+                        </button>
+                        <div class="text-right hidden md:block">
+                            <div class="text-sm text-gray-300">Bienvenido</div>
+                            <div id="user-info" class="font-semibold">Usuario</div>
+                        </div>
+                        <div id="logout-btn" class="hidden">
+                            <!-- Logout button will be added by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Content -->
+        <main class="flex-grow py-6 px-4 bg-gray-50">
+            <div class="max-w-7xl mx-auto">
+                <div class="dev-module-card rounded-xl p-8 md:p-12 text-center">
+                    <div class="max-w-2xl mx-auto">
+                        <i class="fas fa-hand-holding-usd text-6xl text-purple-600 mb-6"></i>
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-800 mb-4">Módulo de Créditos</h2>
+                        <p class="text-lg text-gray-600 mb-6">
+                            Este módulo está actualmente en construcción. Aquí podrás gestionar las solicitudes y aprobaciones de créditos.
+                        </p>
+                        <div class="flex items-center justify-center space-x-2 text-purple-600">
+                            <i class="fas fa-tools text-xl"></i>
+                            <span class="font-medium">Próximamente disponible</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Main JavaScript -->
+    <script src="main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Esperar a que main.js inicialice y verifique auth
+            
+            // Pequeño delay para asegurar que main.js ha procesado la auth
+            setTimeout(() => {
+                if (!window.GestionAuth.isAuthenticated()) {
+                    // Si no está autenticado, main.js ya redirigió
+                    return;
+                }
+
+                // Verificar acceso específico para este módulo
+                // Roles permitidos: admin, asesor
+                if (!window.GestionAuth.checkAccess(['asesor'])) {
+                    alert('No tienes permiso para acceder a este módulo.');
+                    window.location.href = 'index.html';
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
