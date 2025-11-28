@@ -190,9 +190,14 @@
                         <i class="fas fa-eye"></i>
                     </button>
                     <button onclick="event.stopPropagation(); window.AhorroProgramadoModule.openEditModal(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
-                            class="text-purple-600 hover:text-purple-800 transition-colors"
+                            class="text-purple-600 hover:text-purple-800 transition-colors mr-2"
                             title="Editar">
                         <i class="fas fa-edit"></i>
+                    </button>
+                    <button onclick="event.stopPropagation(); window.AhorroProgramadoModule.generateChecklist(${JSON.stringify(item).replace(/"/g, '&quot;')})" 
+                            class="text-orange-600 hover:text-orange-800 transition-colors"
+                            title="Imprimir Checklist">
+                        <i class="fas fa-print"></i>
                     </button>
                 </td>
             `;
@@ -412,6 +417,282 @@
         applyFilters();
     }
 
+    // ===== UTILIDADES PARA CHECKLIST =====
+    function numberToWords(number) {
+        const unidades = ['', 'UN', 'DOS', 'TRES', 'CUATRO', 'CINCO', 'SEIS', 'SIETE', 'OCHO', 'NUEVE'];
+        const decenas = ['', 'DIEZ', 'VEINTE', 'TREINTA', 'CUARENTA', 'CINCUENTA', 'SESENTA', 'SETENTA', 'OCHENTA', 'NOVENTA'];
+        const diez_veinte = ['DIEZ', 'ONCE', 'DOCE', 'TRECE', 'CATORCE', 'QUINCE', 'DIECISEIS', 'DIECISIETE', 'DIECIOCHO', 'DIECINUEVE'];
+        const centenas = ['', 'CIENTO', 'DOSCIENTOS', 'TRESCIENTOS', 'CUATROCIENTOS', 'QUINIENTOS', 'SEISCIENTOS', 'SETECIENTOS', 'OCHOCIENTOS', 'NOVECIENTOS'];
+
+        function convertGroup(n) {
+            let output = '';
+            if (n === 100) return 'CIEN';
+
+            if (n >= 100) {
+                output += centenas[Math.floor(n / 100)] + ' ';
+                n %= 100;
+            }
+
+            if (n >= 10 && n <= 19) {
+                output += diez_veinte[n - 10] + ' ';
+                return output;
+            } else if (n >= 20) {
+                output += decenas[Math.floor(n / 10)] + ' ';
+                n %= 10;
+                if (n > 0) output = output.trim() + ' Y ';
+            }
+
+            if (n > 0) {
+                output += unidades[n] + ' ';
+            }
+            return output;
+        }
+
+        if (number === 0) return 'CERO';
+
+        let str = '';
+        const millions = Math.floor(number / 1000000);
+        number %= 1000000;
+        const thousands = Math.floor(number / 1000);
+        const units = Math.floor(number % 1000);
+
+        if (millions > 0) {
+            str += (millions === 1 ? 'UN MILLON' : convertGroup(millions).trim() + ' MILLONES') + ' ';
+        }
+        if (thousands > 0) {
+            str += (thousands === 1 ? 'MIL' : convertGroup(thousands).trim() + ' MIL') + ' ';
+        }
+        if (units > 0) {
+            str += convertGroup(units);
+        }
+
+        return str.trim();
+    }
+
+    function formatCurrency(amount) {
+        let num = parseFloat(String(amount).replace(/[^0-9.]/g, '')) || 0;
+        const formattedUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+        const integerPart = Math.floor(num);
+        const decimalPart = Math.round((num - integerPart) * 100);
+        const decimalStr = decimalPart.toString().padStart(2, '0');
+        const words = numberToWords(integerPart);
+        return `${formattedUSD} (${words} DOLARES ${decimalStr}/100)`;
+    }
+
+    function generateChecklist(item) {
+        if (!item) return;
+
+        const nombreSocio = item.nombre_socio || '';
+        const fechaActual = new Date().toLocaleDateString('es-EC');
+        const oficina = item.oficina || '';
+        const montoRaw = item.valor_poliza || '0';
+        const montoFormatted = formatCurrency(montoRaw);
+
+        // Branding Colors
+        const cPrimary = '#001749';
+        const cAccent = '#e48410';
+        const cBlue = '#3787c6';
+        const cLightBlue = '#015cd0';
+        const logoUrl = 'https://lh3.googleusercontent.com/d/1idgiPohtekZVIYJ-pmza9PSQqEamUvfH=w2048?name=TUPAK%20RANTINA%20(2).png';
+
+        const personaNaturalItems = [
+            'Copia de la cedula Deudor/ a Color',
+            'Papeleta de votación',
+            'Solicitud de ingreso',
+            'Formulario conozca a su cliente',
+            'Certificado de Ahorro inversion',
+            'Licitud de fondos',
+            'Planilla de la luz',
+            'Otros:'
+        ];
+
+        const personaJuridicaItems = [
+            'Ruc, de la institución',
+            'Nombramiento del representante Legal',
+            'Copia de la cedula del representante Legal / a Color',
+            'Papeleta de votación',
+            'Solicitud de ingreso',
+            'Formulario conozca a su cliente',
+            'Certificado de Ahorro inversión',
+            'Licitud de Fondo',
+            'Planilla de la luz',
+            'Otros:'
+        ];
+
+        const createRows = (items) => items.map(text => `
+            <tr>
+                <td style="padding: 2px 4px; border: 1px solid #ccc;">${text}</td>
+                <!-- SI -->
+                <td style="padding: 0; border: 1px solid #ccc; text-align: center; width: 25px; font-size: 9px;"></td>
+                <!-- NO -->
+                <td style="padding: 0; border: 1px solid #ccc; text-align: center; width: 25px; font-size: 9px;"></td>
+                <!-- SI -->
+                <td style="padding: 0; border: 1px solid #ccc; text-align: center; width: 25px; font-size: 9px;"></td>
+                <!-- NO -->
+                <td style="padding: 0; border: 1px solid #ccc; text-align: center; width: 25px; font-size: 9px;"></td>
+                <!-- OBSERVACIÓN -->
+                <td style="padding: 2px 4px; border: 1px solid #ccc; width: 150px;"></td>
+            </tr>
+        `).join('');
+
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html lang="es">
+            <head>
+                <meta charset="UTF-8">
+                <title>Checklist_Ahorro_${nombreSocio.replace(/\\s+/g, '_')}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+                    body { font-family: 'Roboto', sans-serif; margin: 0; padding: 15px; color: #333; font-size: 10px; }
+                    
+                    /* Header Style similar to Cuentas/Creditos */
+                    .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid ${cAccent}; padding-bottom: 10px; margin-bottom: 8px; }
+                    .logo { max-height: 50px; }
+                    .title-box { text-align: right; }
+                    .title-box h1 { margin: 0; color: ${cPrimary}; font-size: 16px; text-transform: uppercase; }
+                    .title-box p { margin: 1px 0 0; color: ${cBlue}; font-size: 11px; }
+                    .meta-codes { font-size: 9px; color: #666; margin-top: 3px; }
+
+                    /* Info Grid */
+                    .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; background: #f9f9f9; padding: 8px; border-radius: 6px; border-left: 4px solid ${cPrimary}; }
+                    .info-item { margin-bottom: 3px; }
+                    .info-label { font-weight: bold; color: ${cPrimary}; display: block; font-size: 9px; text-transform: uppercase; }
+                    .info-value { font-size: 11px; color: #000; border-bottom: 1px solid #ddd; padding-bottom: 1px; display: block; width: 100%; min-height: 15px; }
+                    
+                    /* Section Title */
+                    .section-title { background: #d1d5db; color: #000; padding: 3px 8px; font-weight: bold; margin-top: 10px; margin-bottom: 3px; font-size: 10px; border-radius: 3px; text-transform: uppercase; }
+
+                    /* Table Styles */
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 10px; }
+                    th { background: #d1d5db; color: #000; padding: 2px; text-align: center; font-size: 9px; border: 1px solid #9ca3af; font-weight: bold; }
+                    td { font-size: 9px; }
+                    /* Alternating Row Colors */
+                    tr:nth-child(even) { background-color: #f2f2f2; }
+
+                    /* Footer Styles */
+                    .footer { margin-top: 20px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+                    .signature-box { width: 45%; border: 1px solid #333; display: flex; flex-direction: column; }
+                    .signature-label { background: ${cBlue}; color: white; font-weight: bold; font-size: 9px; text-align: center; padding: 2px; border-bottom: 1px solid #333; }
+                    .signature-content { height: 60px; } /* Space for signature */
+                    .signature-footer { border-top: 1px solid #333; padding: 5px; font-size: 9px; }
+
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                        @page { margin: 0.5cm; size: A4; }
+                        /* Ensure background colors print */
+                        tr:nth-child(even) { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #f2f2f2; }
+                        .signature-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: ${cBlue}; color: white; }
+                        .section-title { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #d1d5db; }
+                        th { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: #d1d5db; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <img src="${logoUrl}" alt="Tupak Rantina" class="logo">
+                    <div class="title-box">
+                        <h1>CHECK LIST AHORRO INVERSIÓN</h1>
+                        <p>Gestión de Ahorro Programado</p>
+                        <div class="meta-codes">
+                            <div>Fecha: ${fechaActual}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-item" style="grid-column: span 2;">
+                        <span class="info-label">Socio</span>
+                        <span class="info-value">${nombreSocio}</span>
+                    </div>
+                    
+                    <div class="info-item">
+                        <span class="info-label">Cédula</span>
+                        <span class="info-value">${item.cedula || ''}</span>
+                    </div>
+
+                    <div class="info-item">
+                        <span class="info-label">Oficina</span>
+                        <span class="info-value">${oficina}</span>
+                    </div>
+
+                    <div class="info-item" style="grid-column: span 2;">
+                        <span class="info-label">Monto Inversión</span>
+                        <span class="info-value">${montoFormatted}</span>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 40%; text-align: left; padding-left: 8px;">DOCUMENTACIÓN PERSONA NATURAL</th>
+                            <th colspan="2" style="width: 15%;">SI / NO</th>
+                            <th colspan="2" style="width: 15%;">SI / NO</th>
+                            <th rowspan="2" style="width: 30%;">OBSERVACIÓN</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 7.5%;">SI</th>
+                            <th style="width: 7.5%;">NO</th>
+                            <th style="width: 7.5%;">SI</th>
+                            <th style="width: 7.5%;">NO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${createRows(personaNaturalItems)}
+                    </tbody>
+                </table>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2" style="width: 40%; text-align: left; padding-left: 8px;">DOCUMENTACIÓN PERSONA JURIDICA</th>
+                            <th colspan="2" style="width: 15%;">SI / NO</th>
+                            <th colspan="2" style="width: 15%;">SI / NO</th>
+                            <th rowspan="2" style="width: 30%;">OBSERVACIÓN</th>
+                        </tr>
+                        <tr>
+                            <th style="width: 7.5%;">SI</th>
+                            <th style="width: 7.5%;">NO</th>
+                            <th style="width: 7.5%;">SI</th>
+                            <th style="width: 7.5%;">NO</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${createRows(personaJuridicaItems)}
+                    </tbody>
+                </table>
+
+                <div class="footer">
+                    <div class="signature-box">
+                        <div class="signature-label">Entrega Asistente de Ahorros inversión</div>
+                        <div class="signature-content"></div>
+                        <div class="signature-footer">
+                            Nombre:<br>
+                            Fecha:
+                        </div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-label">Verificado por Administrador de la Caja</div>
+                        <div class="signature-content"></div>
+                        <div class="signature-footer">
+                            Nombre:<br>
+                            Fecha:
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    window.onload = function() { window.print(); }
+                </script>
+            </body>
+            </html>
+        `;
+
+        const win = window.open('', '_blank');
+        win.document.write(htmlContent);
+        win.document.close();
+    }
+
     function generateReport() {
         const user = window.GestionAuth.getUser();
         const generatedBy = user ? user.email : 'Usuario del Sistema';
@@ -575,7 +856,8 @@
         openEditModal,
         closeFormModal,
         sortBy,
-        generateReport
+        generateReport,
+        generateChecklist
     };
 
 })();
