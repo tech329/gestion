@@ -164,15 +164,60 @@
             <div class="max-w-7xl mx-auto">
                 
                 <!-- Utilidades Section -->
-                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Utilidades de Caja</h2>
-                    
-                    <!-- Consultar Valor de Pago -->
-                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                        <h3 class="text-lg font-semibold text-gray-700 mb-4">
+                <!-- Main Menu Section -->
+                <div id="caja-menu" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <!-- Card: Consultar Valor de Pago -->
+                    <div onclick="window.CajaModule.showSection('consultar-pago')" 
+                         class="bg-white rounded-xl shadow-sm p-8 cursor-pointer hover:shadow-md transition-all transform hover:-translate-y-1 border border-gray-200 group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-green-100 rounded-lg group-hover:bg-green-200 transition-colors">
+                                <i class="fas fa-search-dollar text-2xl text-green-600"></i>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300 group-hover:text-gray-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Consultar Valor de Pago</h3>
+                        <p class="text-gray-500 text-sm">Busque socios por cédula o nombre para consultar valores pendientes y enlaces de pago.</p>
+                    </div>
+
+                    <!-- Card: Papeletas -->
+                    <div onclick="window.CajaModule.showSection('papeletas')" 
+                         class="bg-white rounded-xl shadow-sm p-8 cursor-pointer hover:shadow-md transition-all transform hover:-translate-y-1 border border-gray-200 group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-blue-100 rounded-lg group-hover:bg-blue-200 transition-colors">
+                                <i class="fas fa-file-invoice text-2xl text-blue-600"></i>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300 group-hover:text-gray-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Papeletas</h3>
+                        <p class="text-gray-500 text-sm">Visualice y gestione las papeletas de depósito.</p>
+                    </div>
+
+                    <!-- Card: Licitud de Fondos -->
+                    <div onclick="window.CajaModule.showSection('licitud-fondos')" 
+                         class="bg-white rounded-xl shadow-sm p-8 cursor-pointer hover:shadow-md transition-all transform hover:-translate-y-1 border border-gray-200 group">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="p-3 bg-purple-100 rounded-lg group-hover:bg-purple-200 transition-colors">
+                                <i class="fas fa-file-contract text-2xl text-purple-600"></i>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-300 group-hover:text-gray-500 transition-colors"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">Licitud de Fondos</h3>
+                        <p class="text-gray-500 text-sm">Gestione los formularios de licitud de fondos.</p>
+                    </div>
+                </div>
+
+                <!-- Section: Consultar Valor de Pago -->
+                <div id="section-consultar-pago" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6 border-b pb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
                             <i class="fas fa-search-dollar text-green-600 mr-2"></i> Consultar Valor de Pago
-                        </h3>
-                        
+                        </h2>
+                        <button onclick="window.CajaModule.showMenu()" class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                            <i class="fas fa-arrow-left mr-1"></i> Volver al Menú
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
                         <div class="flex flex-col md:flex-row gap-4 mb-6">
                             <div class="flex-grow">
                                 <label for="search-input" class="block text-sm font-medium text-gray-700 mb-1">Buscar Socio</label>
@@ -211,6 +256,268 @@
                         
                         <div id="no-results" class="hidden text-center py-8 text-gray-500">
                             No se encontraron resultados para la búsqueda.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Papeletas -->
+                <div id="section-papeletas" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6 border-b pb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-file-invoice text-blue-600 mr-2"></i> Papeletas
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button onclick="window.CajaModule.openReportModal()" class="text-sm bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded transition-colors flex items-center">
+                            Reporte
+                            </button>
+                            <button onclick="window.CajaModule.showMenu()" class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                                <i class="fas fa-arrow-left mr-1"></i> Volver al Menú
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="relative w-64">
+                                <input type="text" id="papeletas-search" 
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm" 
+                                       placeholder="Buscar papeleta, socio...">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button onclick="window.CajaModule.loadPapeletas()" class="text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded transition-colors">
+                                <i class="fas fa-sync-alt mr-1"></i> Recargar
+                            </button>
+                        </div>
+                        
+                        <div id="papeletas-loading" class="hidden text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                            <p class="mt-2 text-gray-500">Cargando datos...</p>
+                        </div>
+
+                        <div id="papeletas-container" class="hidden overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Papeleta</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Socio</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Monto</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="papeletas-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Rows will be populated here -->
+                                </tbody>
+                            </table>
+                            <div id="papeletas-pagination" class="flex justify-between items-center mt-4 px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                                <!-- Pagination controls -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section: Licitud de Fondos -->
+                <div id="section-licitud-fondos" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex items-center justify-between mb-6 border-b pb-4">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-file-contract text-purple-600 mr-2"></i> Licitud de Fondos
+                        </h2>
+                        <div class="flex space-x-2">
+                            <button onclick="window.CajaModule.openNewLicitudModal()" class="text-sm bg-purple-600 text-white hover:bg-purple-700 px-3 py-1 rounded transition-colors flex items-center">
+                                <i class="fas fa-plus mr-1"></i> Nuevo
+                            </button>
+                            <button onclick="window.CajaModule.openLicitudReportModal()" class="text-sm bg-green-100 text-green-700 hover:bg-green-200 px-3 py-1 rounded transition-colors flex items-center">
+                                Reporte
+                            </button>
+                            <button onclick="window.CajaModule.showMenu()" class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
+                                <i class="fas fa-arrow-left mr-1"></i> Volver al Menú
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <div class="relative w-64">
+                                <input type="text" id="licitud-search" 
+                                       class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm" 
+                                       placeholder="Buscar por nombre, cédula...">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button onclick="window.CajaModule.loadLicitudFondos()" class="text-sm bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1 rounded transition-colors">
+                                <i class="fas fa-sync-alt mr-1"></i> Recargar
+                            </button>
+                        </div>
+                        
+                        <div id="licitud-loading" class="hidden text-center py-8">
+                            <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+                            <p class="mt-2 text-gray-500">Cargando datos...</p>
+                        </div>
+
+                        <div id="licitud-container" class="hidden overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-100">
+                                    <tr>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fecha</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Transacción</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Identificación</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nombres</th>
+                                        <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Valor</th>
+                                        <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="licitud-body" class="bg-white divide-y divide-gray-200">
+                                    <!-- Rows will be populated here -->
+                                </tbody>
+                            </table>
+                            <div id="licitud-pagination" class="flex justify-between items-center mt-4 px-4 py-3 bg-white border-t border-gray-200 sm:px-6">
+                                <!-- Pagination controls -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal: Detalle Papeleta -->
+                <div id="modal-detalle-papeleta" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+                    <div class="relative mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-medium text-gray-900">Detalle de Papeleta</h3>
+                            <button onclick="window.CajaModule.closeDetailModal()" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="detalle-content" class="space-y-3 text-sm">
+                            <!-- Content populated by JS -->
+                        </div>
+                        <div class="mt-6 flex justify-end space-x-3">
+                            <button onclick="window.CajaModule.printPapeletaFromModal()" class="px-4 py-2 bg-blue-600 text-white text-base font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                                <i class="fas fa-print mr-2"></i> Imprimir
+                            </button>
+                            <button onclick="window.CajaModule.closeDetailModal()" class="px-4 py-2 bg-gray-200 text-gray-800 text-base font-medium rounded-md shadow-sm hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-300">
+                                Cerrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal: Reporte -->
+                <div id="modal-reporte" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+                    <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Generar Reporte</h3>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                            <select id="report-sort" class="w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="fecha">Fecha</option>
+                                <option value="papeleta">Número de Papeleta</option>
+                                <option value="socio">Socio</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="window.CajaModule.closeReportModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                            <button onclick="window.CajaModule.generateReport()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Generar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal: Formulario Licitud -->
+                <div id="modal-licitud-form" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+                    <div class="relative mx-auto p-6 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 id="modal-licitud-title" class="text-lg font-medium text-gray-900">Nueva Licitud de Fondos</h3>
+                            <button onclick="window.CajaModule.closeLicitudModal()" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <form id="licitud-form" onsubmit="event.preventDefault(); window.CajaModule.saveLicitud();">
+                            <input type="hidden" id="licitud-id">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Agencia</label>
+                                    <input type="text" id="licitud-agencia" value="MATRIZ" readonly class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-600 focus:outline-none sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Transacción</label>
+                                    <select id="licitud-transaccion" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                        <option value="">Seleccione...</option>
+                                        <option value="DEPOSITO AHORROS">DEPOSITO AHORROS</option>
+                                        <option value="AHORRO PROGRAMADO">AHORRO PROGRAMADO</option>
+                                        <option value="OTROS">OTROS</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Fecha Ingreso</label>
+                                    <input type="date" id="licitud-fecha" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Identificación</label>
+                                    <input type="text" id="licitud-identificacion" placeholder="Ingrese cédula (10 dígitos)" maxlength="10" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700">Nombres Completos</label>
+                                    <input type="text" id="licitud-nombres" placeholder="Nombre del socio/cliente" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                </div>
+                                <div class="md:col-span-2 relative">
+                                    <label class="block text-sm font-medium text-gray-700">Actividad Económica</label>
+                                    <input type="text" id="licitud-actividad-input" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" placeholder="Buscar actividad..." autocomplete="off" required>
+                                    <input type="hidden" id="licitud-actividad-codigo">
+                                    <div id="licitud-actividad-list" class="hidden absolute z-10 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                        <!-- Autocomplete items -->
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Documento (Número de Voucher)</label>
+                                    <input type="text" id="licitud-documento" placeholder="Ej: 244414514" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700">Valor Operación</label>
+                                    <input type="number" step="0.01" id="licitud-valor" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm" required>
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700">Observación</label>
+                                    <textarea id="licitud-observacion" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"></textarea>
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-3">
+                                <button type="button" onclick="window.CajaModule.closeLicitudModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                                <button type="submit" class="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Modal: Detalle Licitud -->
+                <div id="modal-licitud-detalle" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+                    <div class="relative mx-auto p-6 border w-full max-w-lg shadow-lg rounded-md bg-white">
+                        <div class="flex justify-between items-center mb-4 border-b pb-2">
+                            <h3 class="text-lg font-medium text-gray-900">Detalle Licitud de Fondos</h3>
+                            <button onclick="window.CajaModule.closeLicitudDetailModal()" class="text-gray-400 hover:text-gray-500">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div id="licitud-detalle-content" class="space-y-3 text-sm">
+                            <!-- Content populated by JS -->
+                        </div>
+                        <div class="mt-6 flex justify-end">
+                            <button onclick="window.CajaModule.closeLicitudDetailModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal: Reporte Licitud -->
+                <div id="modal-licitud-reporte" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 flex items-center justify-center">
+                    <div class="relative mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+                        <h3 class="text-lg font-medium text-gray-900 mb-4">Generar Reporte Licitud</h3>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Ordenar por</label>
+                            <select id="licitud-report-sort" class="w-full border-gray-300 rounded-md shadow-sm focus:border-purple-500 focus:ring-purple-500">
+                                <option value="fecha">Fecha</option>
+                                <option value="nombres">Nombres</option>
+                                <option value="valor">Valor</option>
+                            </select>
+                        </div>
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="window.CajaModule.closeLicitudReportModal()" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
+                            <button onclick="window.CajaModule.generateLicitudReport()" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Generar</button>
                         </div>
                     </div>
                 </div>
