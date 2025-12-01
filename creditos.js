@@ -79,14 +79,15 @@
             const userRoles = (localStorage.getItem('gestion_user_roles') || '').toLowerCase();
             const isAdmin = userRoles.includes('admin');
             const isAsesor = userRoles.includes('asesor');
+            const isCreditos = userRoles.includes('creditos');
 
             let query = db
                 .from('actas_creditos_tupakra')
                 .select('*')
                 .order('fecha_hora', { ascending: false });
 
-            // Si es asesor y NO es admin, filtrar por su correo
-            if (isAsesor && !isAdmin) {
+            // Si es asesor y NO es admin y NO es creditos, filtrar por su correo
+            if (isAsesor && !isAdmin && !isCreditos) {
                 if (user && user.email) {
                     query = query.eq('correo_asesor', user.email);
                 }

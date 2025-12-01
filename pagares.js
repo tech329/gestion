@@ -29,7 +29,8 @@
     // ===== INICIALIZACIÓN =====
     document.addEventListener('DOMContentLoaded', () => {
         // Verificar acceso nuevamente (aunque ya se hace en el HTML)
-        if (!window.GestionAuth.checkAccess(['admin'])) return;
+        // Verificar acceso nuevamente (aunque ya se hace en el HTML)
+        if (!window.GestionAuth.checkAccess(['admin', 'pagares'])) return;
 
         loadPagares();
         setupEventListeners();
@@ -90,7 +91,7 @@
         // Filtro Búsqueda
         if (currentFilters.search) {
             const term = currentFilters.search.toLowerCase();
-            filtered = filtered.filter(item => 
+            filtered = filtered.filter(item =>
                 (item.cedula_socio && item.cedula_socio.toLowerCase().includes(term)) ||
                 (item.nombre_socio && item.nombre_socio.toLowerCase().includes(term)) ||
                 (item.credito && item.credito.toLowerCase().includes(term))
@@ -173,10 +174,10 @@
             const tr = document.createElement('tr');
             const isRegularizado = item.regularizado;
             tr.className = `transition-colors ${!isRegularizado ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-gray-50'}`;
-            
+
             const fecha = item.fecha_hora ? new Date(item.fecha_hora).toLocaleDateString('es-EC') : '-';
             const pagare = item.credito ? item.credito.toString().padStart(4, '0') : '-';
-            
+
             tr.innerHTML = `
                 <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${fecha}</td>
                 <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.cedula_socio || '-'}</td>
@@ -278,9 +279,9 @@
     function generateReport() {
         const user = window.GestionAuth.getUser();
         const generatedBy = user ? user.email : 'Usuario del Sistema';
-        const fechaActual = new Date().toLocaleDateString('es-EC', { 
-            year: 'numeric', 
-            month: 'long', 
+        const fechaActual = new Date().toLocaleDateString('es-EC', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -292,11 +293,11 @@
         const logoUrl = 'https://lh3.googleusercontent.com/d/1idgiPohtekZVIYJ-pmza9PSQqEamUvfH=w2048?name=TUPAK%20RANTINA%20(2).png';
 
         let reportData = [...pagaresData];
-        
+
         // Re-aplicar filtros para el reporte
         if (currentFilters.search) {
             const term = currentFilters.search.toLowerCase();
-            reportData = reportData.filter(item => 
+            reportData = reportData.filter(item =>
                 (item.cedula_socio && item.cedula_socio.toLowerCase().includes(term)) ||
                 (item.nombre_socio && item.nombre_socio.toLowerCase().includes(term)) ||
                 (item.credito && item.credito.toLowerCase().includes(term))
@@ -312,7 +313,7 @@
             const pagare = item.credito ? item.credito.toString().padStart(4, '0') : '-';
             const estado = item.regularizado ? 'Regularizado' : 'Pendiente';
             const estadoColor = item.regularizado ? '#10b981' : '#ef4444';
-            
+
             return `
                 <tr style="background-color: ${index % 2 === 0 ? '#fff' : '#f9fafb'};">
                     <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${index + 1}</td>

@@ -285,8 +285,8 @@
                 }
 
                 // Verificar acceso específico para este módulo
-                // Roles permitidos: admin
-                if (!window.GestionAuth.checkAccess(['admin'])) {
+                // Roles permitidos: admin, pagares
+                if (!window.GestionAuth.checkAccess(['admin', 'pagares'])) {
                     alert('No tienes permiso para acceder a este módulo.');
                     window.location.href = 'index.html';
                 }

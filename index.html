@@ -393,6 +393,7 @@
                 const hasAsesor = window.GestionAuth.checkAccess(['asesor']);
                 const hasCaja = window.GestionAuth.checkAccess(['caja']);
                 const hasProgramado = window.GestionAuth.checkAccess(['programado']);
+                const hasPagares = window.GestionAuth.checkAccess(['pagares']);
                 const isAdmin = window.GestionAuth.checkAccess(['admin']);
 
                 const cuentasModule = document.getElementById('module-cuentas');
@@ -410,7 +411,7 @@
                     anyVisible = true;
                 }
 
-                if (isAdmin) {
+                if (hasPagares || isAdmin) {
                     pagaresModule.classList.remove('hidden');
                     anyVisible = true;
                 }

@@ -132,10 +132,10 @@
     function populateAsesorFilter() {
         if (!filterAsesor) return;
         const asesores = [...new Set(cuentasData.map(item => item.asesor).filter(Boolean))].sort();
-        
+
         // Guardar selección actual si existe
         const currentVal = filterAsesor.value;
-        
+
         filterAsesor.innerHTML = '<option value="all">Oficial: Todos</option>';
         asesores.forEach(asesor => {
             const option = document.createElement('option');
@@ -143,7 +143,7 @@
             option.textContent = asesor;
             filterAsesor.appendChild(option);
         });
-        
+
         // Restaurar selección si es posible
         if (currentVal && asesores.includes(currentVal)) {
             filterAsesor.value = currentVal;
@@ -156,7 +156,7 @@
         // Filtro Búsqueda
         if (currentFilters.search) {
             const term = currentFilters.search.toLowerCase();
-            filtered = filtered.filter(item => 
+            filtered = filtered.filter(item =>
                 (item.cedula && item.cedula.toLowerCase().includes(term)) ||
                 (item.nombre_1 && item.nombre_1.toLowerCase().includes(term)) ||
                 (item.apellido_1 && item.apellido_1.toLowerCase().includes(term)) ||
@@ -251,11 +251,11 @@
             const tr = document.createElement('tr');
             const isRegularizado = item.regularizado;
             tr.className = `transition-colors ${!isRegularizado ? 'bg-orange-50 hover:bg-orange-100' : 'hover:bg-gray-50'}`;
-            
+
             const fecha = new Date(item.created_at).toLocaleDateString('es-EC');
             const nombres = `${item.nombre_1 || ''} ${item.nombre_2 || ''}`.trim();
             const apellidos = `${item.apellido_1 || ''} ${item.apellido_2 || ''}`.trim();
-            
+
             tr.innerHTML = `
                 <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-500">${fecha}</td>
                 <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">${item.cedula || '-'}</td>
@@ -309,21 +309,21 @@
         e.preventDefault();
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
-        
+
         // Añadir campos automáticos
         const user = window.GestionAuth.getUser();
         data.asesor = user ? user.email : 'Desconocido';
-        
+
         try {
             const { error } = await db.from('cuentas_tr').insert([data]);
-            
+
             if (error) throw error;
-            
+
             window.GestionAuth.showToast('Cuenta creada exitosamente', 'success');
             closeModal();
             form.reset();
             loadCuentas();
-            
+
         } catch (error) {
             console.error('Error creando cuenta:', error);
             window.GestionAuth.showToast('Error al crear la cuenta: ' + error.message, 'error');
@@ -334,23 +334,23 @@
         e.preventDefault();
         const id = obsIdInput.value;
         const observaciones = obsTextInput.value;
-        
+
         try {
             const { error } = await db
                 .from('cuentas_tr')
                 .update({ observaciones })
                 .eq('id', id);
-                
+
             if (error) throw error;
-            
+
             // Actualizar localmente
             const item = cuentasData.find(i => i.id == id);
             if (item) item.observaciones = observaciones;
-            
+
             window.GestionAuth.showToast('Observación actualizada', 'success');
             closeObservationModal();
             applyFilters(); // Re-renderizar para mostrar cambios
-            
+
         } catch (error) {
             console.error('Error actualizando observación:', error);
             window.GestionAuth.showToast('Error al actualizar', 'error');
@@ -372,9 +372,9 @@
         closeReportModal();
         const user = window.GestionAuth.getUser();
         const generatedBy = user ? user.email : 'Usuario del Sistema';
-        const fechaActual = new Date().toLocaleDateString('es-EC', { 
-            year: 'numeric', 
-            month: 'long', 
+        const fechaActual = new Date().toLocaleDateString('es-EC', {
+            year: 'numeric',
+            month: 'long',
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
@@ -390,11 +390,11 @@
         const logoUrl = 'https://lh3.googleusercontent.com/d/1idgiPohtekZVIYJ-pmza9PSQqEamUvfH=w2048?name=TUPAK%20RANTINA%20(2).png';
 
         let reportData = [...cuentasData];
-        
+
         // Re-aplicar filtros para el reporte
         if (currentFilters.search) {
             const term = currentFilters.search.toLowerCase();
-            reportData = reportData.filter(item => 
+            reportData = reportData.filter(item =>
                 (item.cedula && item.cedula.toLowerCase().includes(term)) ||
                 (item.nombre_1 && item.nombre_1.toLowerCase().includes(term)) ||
                 (item.apellido_1 && item.apellido_1.toLowerCase().includes(term)) ||
@@ -440,7 +440,7 @@
             const nombreCompleto = `${item.apellido_1 || ''} ${item.apellido_2 || ''} ${item.nombre_1 || ''} ${item.nombre_2 || ''}`.trim();
             const estado = item.regularizado ? 'Regularizado' : 'Pendiente';
             const estadoColor = item.regularizado ? '#10b981' : '#ef4444';
-            
+
             return `
                 <tr style="background-color: ${index % 2 === 0 ? '#fff' : '#f9fafb'};">
                     <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">${index + 1}</td>
@@ -620,14 +620,19 @@
                     th { background: ${cLightBlue}; color: white; padding: 4px; text-align: center; font-size: 10px; border: 1px solid ${cPrimary}; }
                     td { font-size: 11px; }
 
-                    .footer { margin-top: 40px; display: flex; justify-content: space-between; page-break-inside: avoid; }
-                    .signature-box { width: 30%; text-align: center; border-top: 1px solid #333; padding-top: 5px; }
-                    .signature-label { font-size: 10px; color: #666; }
+                    /* Footer Styles */
+                    .footer { margin-top: 60px; display: flex; justify-content: space-between; page-break-inside: avoid; }
+                    .signature-box { width: 45%; border: 1px solid #333; display: flex; flex-direction: column; }
+                    .signature-label { background: ${cBlue}; color: white; font-weight: bold; font-size: 9px; text-align: center; padding: 2px; border-bottom: 1px solid #333; }
+                    .signature-content { height: 60px; } /* Space for signature */
+                    .signature-footer { border-top: 1px solid #333; padding: 5px; font-size: 9px; }
 
                     @media print {
                         body { padding: 0; }
                         .no-print { display: none; }
                         @page { margin: 0.5cm; size: A4; }
+                        /* Ensure background colors print */
+                        .signature-label { -webkit-print-color-adjust: exact; print-color-adjust: exact; background-color: ${cBlue}; color: white; }
                     }
                 </style>
             </head>
@@ -709,14 +714,20 @@
 
                 <div class="footer">
                     <div class="signature-box">
-                        <div class="signature-label">Oficial de Cuenta</div>
-                        <div style="font-weight: bold; margin-top: 5px;">${item.asesor || 'Asesor'}</div>
+                        <div class="signature-label">Oficial de Cuentas</div>
+                        <div class="signature-content"></div>
+                        <div class="signature-footer">
+                            Nombre: ${item.asesor || ''}<br>
+                            Fecha:
+                        </div>
                     </div>
                     <div class="signature-box">
-                        <div class="signature-label">Revisado por</div>
-                    </div>
-                    <div class="signature-box">
-                        <div class="signature-label">Aprobado por</div>
+                        <div class="signature-label">Aprobado por Administrador de la Caja</div>
+                        <div class="signature-content"></div>
+                        <div class="signature-footer">
+                            Nombre:<br>
+                            Fecha:
+                        </div>
                     </div>
                 </div>
 
