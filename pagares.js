@@ -1,6 +1,17 @@
 // pagares.js - Lógica del Módulo de Pagarés
 (function () {
-    const db = window.GestionAuth.supabase();
+    // Obtener instancia de Supabase de forma segura (espera a que esté listo)
+    let db = null;
+
+    async function getDb() {
+        if (db && db.from) return db;
+        if (window.GestionSupabaseReady) {
+            db = await window.GestionSupabaseReady;
+        } else if (window.GestionSupabase) {
+            db = window.GestionSupabase;
+        }
+        return db;
+    }
 
     // Estado local
     let pagaresData = [];
@@ -67,7 +78,10 @@
     async function loadPagares() {
         setLoadingTable(true);
         try {
-            const { data, error } = await db
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
+            const { data, error } = await supabase
                 .from('actas_creditos_tupakra')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -231,7 +245,8 @@
                     applyFilters();
                 }
 
-                const { error } = await db
+                const supabase = await getDb();
+                const { error } = await supabase
                     .from('actas_creditos_tupakra')
                     .update({ regularizado: newStatus })
                     .eq('id', id);

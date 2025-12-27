@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -154,8 +155,15 @@
         }
 
         @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
         }
 
         .fade-in {
@@ -163,8 +171,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Hide scrollbar on mobile */
@@ -176,7 +191,10 @@
 
         /* Improve touch targets on mobile */
         @media (max-width: 640px) {
-            button, .input-field, a {
+
+            button,
+            .input-field,
+            a {
                 min-height: 44px;
             }
 
@@ -240,6 +258,7 @@
         }
     </script>
 </head>
+
 <body class="flex items-center justify-center min-h-screen p-4">
     <!-- Floating Shapes Background -->
     <div class="floating-shapes">
@@ -252,12 +271,13 @@
     <div class="login-container rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-md fade-in">
         <!-- Logo and Title -->
         <div class="text-center mb-6 sm:mb-8">
-            <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png"
-                 alt="Tupak Rantina Logo"
-                 class="h-16 sm:h-20 w-auto mx-auto mb-4 sm:mb-6 drop-shadow-lg">
+            <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png" alt="Tupak Rantina Logo"
+                class="h-16 sm:h-20 w-auto mx-auto mb-4 sm:mb-6 drop-shadow-lg">
             <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Sistema de Gestión</h1>
             <p class="text-gray-600 text-xs sm:text-sm">Caja de Ahorro y Crédito Tupak Rantina</p>
-            <div class="w-12 sm:w-16 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto mt-3 sm:mt-4 rounded-full"></div>
+            <div
+                class="w-12 sm:w-16 h-1 bg-gradient-to-r from-purple-600 to-blue-600 mx-auto mt-3 sm:mt-4 rounded-full">
+            </div>
         </div>
 
         <!-- Login Form -->
@@ -269,9 +289,10 @@
                 </label>
                 <div class="relative">
                     <input type="email" id="email" name="email" required
-                           class="input-field w-full px-4 py-3 pl-10 sm:pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
-                           placeholder="tu@email.com">
-                    <i class="fas fa-envelope absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
+                        class="input-field w-full px-4 py-3 pl-10 sm:pl-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
+                        placeholder="tu@email.com">
+                    <i
+                        class="fas fa-envelope absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
                 </div>
             </div>
 
@@ -282,10 +303,12 @@
                 </label>
                 <div class="relative">
                     <input type="password" id="password" name="password" required
-                           class="input-field w-full px-4 py-3 pl-10 sm:pl-12 pr-10 sm:pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
-                           placeholder="••••••••">
-                    <i class="fas fa-lock absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
-                    <button type="button" id="toggle-password" class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
+                        class="input-field w-full px-4 py-3 pl-10 sm:pl-12 pr-10 sm:pr-12 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-all duration-300"
+                        placeholder="••••••••">
+                    <i
+                        class="fas fa-lock absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm sm:text-base"></i>
+                    <button type="button" id="toggle-password"
+                        class="absolute right-3 sm:right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1">
                         <i class="fas fa-eye text-sm sm:text-base"></i>
                     </button>
                 </div>
@@ -295,7 +318,7 @@
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-2 sm:space-y-0">
                 <div class="flex items-center">
                     <input type="checkbox" id="remember" name="remember"
-                           class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
+                        class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300 rounded">
                     <label for="remember" class="ml-2 block text-sm text-gray-700">
                         Recordarme
                     </label>
@@ -307,7 +330,7 @@
 
             <!-- Login Button -->
             <button type="submit" id="login-btn"
-                    class="btn-login w-full py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 flex items-center justify-center min-h-[44px]">
+                class="btn-login w-full py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-600 flex items-center justify-center min-h-[44px]">
                 <span id="login-text">
                     <i class="fas fa-sign-in-alt mr-2"></i>Iniciar Sesión
                 </span>
@@ -338,13 +361,26 @@
     <!-- Scripts -->
     <script>
         // ===== CONFIGURACIÓN SUPABASE =====
-        const SUPABASE_URL = 'https://lpsupabase.luispinta.com';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.bZRDLg2HoJKCXPp_B6BD5s-qcZM6-NrKO8qtxBtFGTk';
+        // Usamos var para evitar errores de "Identifier already declared" con Live Reload
+        var SUPABASE_URL = window.SUPABASE_URL || 'https://lpsupabase.luispinta.com';
+        var SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.bZRDLg2HoJKCXPp_B6BD5s-qcZM6-NrKO8qtxBtFGTk';
+        window.SUPABASE_URL = SUPABASE_URL;
+        window.SUPABASE_ANON_KEY = SUPABASE_ANON_KEY;
 
-        // Crear instancia de Supabase
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-            auth: { persistSession: true, autoRefreshToken: true }
-        });
+        // Crear/reusar instancia de Supabase
+        // IMPORTANTE: Usar sessionStorage para que la sesión se comparta correctamente
+        var supabaseLogin = window.GestionSupabase;
+        if (!supabaseLogin && window.supabase && typeof window.supabase.createClient === 'function') {
+            supabaseLogin = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                auth: {
+                    persistSession: true,
+                    autoRefreshToken: true,
+                    storage: sessionStorage // Usar sessionStorage igual que main.js
+                }
+            });
+            window.GestionSupabase = supabaseLogin;
+            console.log('✅ Cliente Supabase creado en login (sessionStorage)');
+        }
 
         // ===== FUNCIONES DE UTILIDAD =====
         function showMessage(message, type = 'info') {
@@ -433,7 +469,7 @@
             setLoading(true);
 
             try {
-                const { data, error } = await supabase.auth.signInWithPassword({
+                const { data, error } = await supabaseLogin.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -443,7 +479,7 @@
                 }
 
                 // 2. Verificación secundaria en tabla docsuserstr
-                const { data: userData, error: userError } = await supabase
+                const { data: userData, error: userError } = await supabaseLogin
                     .from('docsuserstr')
                     .select('*')
                     .eq('correo', email)
@@ -465,7 +501,7 @@
                 // 3. Guardar información en localStorage
                 localStorage.setItem('gestion_user_name', userData.nombre);
                 localStorage.setItem('gestion_user_roles', userData.rol || ''); // Guardar roles separados por coma
-                
+
                 // Guardar preferencia de recordar
                 if (remember) {
                     localStorage.setItem('gestion_remember_me', 'true');
@@ -514,16 +550,21 @@
         // ===== VERIFICAR SI YA ESTÁ AUTENTICADO =====
         async function checkExistingSession() {
             try {
-                const { data: { user }, error } = await supabase.auth.getUser();
+                if (!supabaseLogin || !supabaseLogin.auth) {
+                    console.log('Supabase no disponible para verificar sesión');
+                    return;
+                }
 
-                if (user && !error) {
+                const { data: { session }, error } = await supabaseLogin.auth.getSession();
+
+                if (session?.user && !error) {
                     showMessage('Ya tienes una sesión activa. Redirigiendo...', 'info');
                     setTimeout(() => {
                         window.location.href = 'index.html';
-                    }, 1500);
+                    }, 1000);
                 }
             } catch (error) {
-                console.log('No hay sesión activa');
+                console.log('No hay sesión activa:', error.message);
             }
         }
 
@@ -544,14 +585,22 @@
         });
 
         // ===== ESCUCHAR CAMBIOS DE AUTENTICACIÓN =====
-        supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN') {
-                showMessage('¡Bienvenido! Redirigiendo a la aplicación...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'index.html';
-                }, 1500);
-            }
-        });
+        // Si hay sesión activa al cargar (INITIAL_SESSION), redirigir a index
+        if (supabaseLogin && supabaseLogin.auth) {
+            supabaseLogin.auth.onAuthStateChange((event, session) => {
+                console.log('Login Auth State Change:', event, session ? 'con sesión' : 'sin sesión');
+
+                // Si hay una sesión inicial válida, redirigir a index
+                if (event === 'INITIAL_SESSION' && session?.user) {
+                    console.log('Sesión activa detectada, redirigiendo a index...');
+                    showMessage('Sesión activa detectada. Redirigiendo...', 'info');
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                }
+            });
+        }
     </script>
 </body>
+
 </html>

@@ -1,9 +1,23 @@
 // cuentas.js - Lógica del Módulo de Cuentas
 // Usamos IIFE para evitar contaminar el scope global y conflictos de variables
 (function () {
-    // Obtener instancia de Supabase desde main.js
-    // Renombramos la variable local para evitar conflictos con otras declaraciones globales si las hubiera
-    const db = window.GestionAuth.supabase();
+    // Obtener instancia de Supabase desde window.GestionSupabase (creado en el HTML antes de main.js)
+    // No usar window.GestionAuth.supabase() porque puede no estar listo aún
+    let db = null;
+
+    // Función para obtener el cliente de forma segura
+    async function getDb() {
+        if (db && db.from) return db;
+
+        // Esperar a que Supabase esté listo
+        if (window.GestionSupabaseReady) {
+            db = await window.GestionSupabaseReady;
+        } else if (window.GestionSupabase) {
+            db = window.GestionSupabase;
+        }
+
+        return db;
+    }
 
     // Estado local
     let cuentasData = [];
@@ -110,7 +124,12 @@
     async function loadCuentas() {
         setLoadingTable(true);
         try {
-            const { data, error } = await db
+            const supabase = await getDb();
+            if (!supabase) {
+                throw new Error('Cliente Supabase no disponible');
+            }
+
+            const { data, error } = await supabase
                 .from('cuentas_tr')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -315,7 +334,8 @@
         data.asesor = user ? user.email : 'Desconocido';
 
         try {
-            const { error } = await db.from('cuentas_tr').insert([data]);
+            const supabase = await getDb();
+            const { error } = await supabase.from('cuentas_tr').insert([data]);
 
             if (error) throw error;
 
@@ -336,7 +356,8 @@
         const observaciones = obsTextInput.value;
 
         try {
-            const { error } = await db
+            const supabase = await getDb();
+            const { error } = await supabase
                 .from('cuentas_tr')
                 .update({ observaciones })
                 .eq('id', id);
@@ -762,7 +783,8 @@
                     applyFilters();
                 }
 
-                const { error } = await db
+                const supabase = await getDb();
+                const { error } = await supabase
                     .from('cuentas_tr')
                     .update({ regularizado: newStatus })
                     .eq('id', id);

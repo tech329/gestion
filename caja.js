@@ -1,6 +1,17 @@
 // caja.js - Lógica del Módulo de Caja
 (function () {
-    const db = window.GestionAuth.supabase();
+    // Obtener instancia de Supabase de forma segura (espera a que esté listo)
+    let db = null;
+
+    async function getDb() {
+        if (db && db.from) return db;
+        if (window.GestionSupabaseReady) {
+            db = await window.GestionSupabaseReady;
+        } else if (window.GestionSupabase) {
+            db = window.GestionSupabase;
+        }
+        return db;
+    }
 
     // Elementos del DOM
     const searchInput = document.getElementById('search-input');
@@ -69,8 +80,11 @@
         console.log('Iniciando carga de datos en segundo plano...');
 
         try {
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
             // Seleccionamos solo los campos necesarios para optimizar
-            const { data, error } = await db
+            const { data, error } = await supabase
                 .from('actas_creditos_tupakra')
                 .select('id, cedula_socio, nombre_socio, monto_aprobado, credito, created_at')
                 .order('created_at', { ascending: false });
@@ -670,7 +684,10 @@
         }
 
         try {
-            const { data, error } = await db
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
+            const { data, error } = await supabase
                 .from('actividades_ciiu')
                 .select('codigo, actividad')
                 .eq('clasificacion', 'SUBNIVEL ACTIVIDAD');
@@ -736,10 +753,13 @@
         licitudContainer.classList.add('hidden');
 
         try {
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
             const user = window.GestionAuth.getUser();
             const isAdmin = window.GestionAuth.checkAccess(['admin']);
 
-            let query = db
+            let query = supabase
                 .from('licitud_fondos')
                 .select('*')
                 .order('fecha_ingreso', { ascending: false });
@@ -916,17 +936,18 @@
         const id = document.getElementById('licitud-id').value;
 
         try {
+            const supabase = await getDb();
             let error;
             if (isEditingLicitud && id) {
                 // Update
-                const { error: updateError } = await db
+                const { error: updateError } = await supabase
                     .from('licitud_fondos')
                     .update({ ...formData, updated_at: new Date() })
                     .eq('id', id);
                 error = updateError;
             } else {
                 // Insert
-                const { error: insertError } = await db
+                const { error: insertError } = await supabase
                     .from('licitud_fondos')
                     .insert([formData]);
                 error = insertError;

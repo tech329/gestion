@@ -1,24 +1,92 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión - Caja de Ahorro y Crédito Tupak Rantina</title>
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
+
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
-    <!-- Supabase CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+
+    <!-- Supabase CDN - Con Promise global (patrón de guía sistema) -->
+    <script>
+        // Configuración global
+        window.SUPABASE_URL = 'https://lpsupabase.luispinta.com';
+        window.SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.ewogICJyb2xlIjogImFub24iLAogICJpc3MiOiAic3VwYWJhc2UiLAogICJpYXQiOiAxNzE1MDUwODAwLAogICJleHAiOiAxODcyODE3MjAwCn0.bZRDLg2HoJKCXPp_B6BD5s-qcZM6-NrKO8qtxBtFGTk';
+
+        // Crear Promise global que main.js puede await
+        window.GestionSupabaseReady = new Promise((resolve, reject) => {
+            const cdns = [
+                'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js',
+                'https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js'
+            ];
+
+            let currentIndex = 0;
+
+            function tryLoadSupabase() {
+                if (currentIndex >= cdns.length) {
+                    console.error('CRÍTICO: No se pudo cargar Supabase desde ningún CDN');
+                    reject(new Error('Failed to load Supabase'));
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = cdns[currentIndex];
+                script.async = false;
+
+                script.onload = function () {
+                    console.log('✅ Supabase cargado desde:', cdns[currentIndex]);
+
+                    if (window.supabase && typeof window.supabase.createClient === 'function') {
+                        // Crear el cliente inmediatamente
+                        try {
+                            const client = window.supabase.createClient(
+                                window.SUPABASE_URL,
+                                window.SUPABASE_ANON_KEY,
+                                {
+                                    auth: {
+                                        persistSession: true,
+                                        autoRefreshToken: true,
+                                        storage: sessionStorage
+                                    }
+                                }
+                            );
+                            window.GestionSupabase = client;
+                            console.log('✅ Cliente Supabase inicializado');
+                            resolve(client);
+                        } catch (e) {
+                            console.error('❌ Error creando cliente:', e);
+                            reject(e);
+                        }
+                    } else {
+                        console.error('❌ window.supabase NO disponible');
+                        reject(new Error('window.supabase not available'));
+                    }
+                };
+
+                script.onerror = function () {
+                    console.warn('Failed:', cdns[currentIndex]);
+                    currentIndex++;
+                    tryLoadSupabase();
+                };
+
+                document.head.appendChild(script);
+            }
+
+            tryLoadSupabase();
+        });
+    </script>
+
+
     <!-- Custom Styles -->
     <style>
         html {
@@ -26,6 +94,7 @@
             margin: 0;
             padding: 0;
         }
+
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
@@ -69,8 +138,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .loading-text {
@@ -104,13 +178,13 @@
             width: 10px;
             height: 10px;
         }
-        
+
         ::-webkit-scrollbar-track {
             background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
             border-radius: 8px;
             box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-        
+
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(180deg, #7c3aed 0%, #6d28d9 50%, #5b21b6 100%);
             border-radius: 8px;
@@ -118,38 +192,40 @@
             box-shadow: 0 2px 4px rgba(124, 58, 237, 0.3);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
             background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%);
             box-shadow: 0 4px 8px rgba(139, 92, 246, 0.4);
             transform: scale(1.1);
         }
-        
+
         ::-webkit-scrollbar-thumb:active {
             background: linear-gradient(180deg, #a78bfa 0%, #8b5cf6 50%, #7c3aed 100%);
             box-shadow: 0 6px 12px rgba(167, 139, 250, 0.5);
         }
-        
+
         ::-webkit-scrollbar-corner {
             background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
             border-radius: 0 0 8px 0;
         }
-        
+
         /* Firefox modern scrollbar */
         * {
             scrollbar-width: thin;
             scrollbar-color: #7c3aed #f8fafc;
         }
-        
+
         /* Enhanced scrollbar for mobile */
         @media (max-width: 640px) {
             ::-webkit-scrollbar {
                 width: 6px;
                 height: 6px;
             }
+
             ::-webkit-scrollbar-thumb {
                 border: 1px solid #f8fafc;
             }
+
             * {
                 scrollbar-width: thin;
             }
@@ -160,6 +236,7 @@
             display: flex;
             border-bottom: 1px solid #e5e7eb;
         }
+
         .tab-button {
             padding: 8px 16px;
             background: none;
@@ -171,24 +248,28 @@
             border-bottom: 2px solid transparent;
             transition: all 0.2s;
         }
+
         .tab-button.active {
             color: #7c3aed;
             border-bottom-color: #7c3aed;
         }
+
         .tab-button:hover {
             color: #7c3aed;
         }
-        
+
         /* Mobile tab styles */
         .mobile-tab-button {
             color: #374151;
             font-weight: 500;
             transition: all 0.2s;
         }
+
         .mobile-tab-button:hover {
             color: #7c3aed;
             background-color: #f9fafb;
         }
+
         .mobile-tab-button.active {
             color: #7c3aed;
             background-color: #f3e8ff;
@@ -199,6 +280,7 @@
             width: 100%;
             transition: opacity 0.3s ease-in-out;
         }
+
         .tab-content.active {
             display: block;
             opacity: 1;
@@ -233,6 +315,7 @@
         }
     </script>
 </head>
+
 <body class="bg-gray-100 antialiased">
 
     <!-- Loading Screen -->
@@ -250,15 +333,16 @@
             <div class="max-w-7xl mx-auto">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-4 ml-[5%] transition-all duration-300 ease-in-out">
-                        <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png" 
-                             alt="Tupak Rantina Logo" 
-                             class="h-12 md:h-16 w-auto transition-all duration-300 ease-in-out">
+                        <img src="https://i.postimg.cc/zBPmbxNT/TRANSPARENTE-min.png" alt="Tupak Rantina Logo"
+                            class="h-12 md:h-16 w-auto transition-all duration-300 ease-in-out">
                         <div class="text-left">
-                            <h1 class="text-xl md:text-2xl font-bold transition-all duration-300 ease-in-out">Sistema de Gestión</h1>
-                            <p class="text-gray-300 text-xs md:text-sm transition-all duration-300 ease-in-out">Menú Principal</p>
+                            <h1 class="text-xl md:text-2xl font-bold transition-all duration-300 ease-in-out">Sistema de
+                                Gestión</h1>
+                            <p class="text-gray-300 text-xs md:text-sm transition-all duration-300 ease-in-out">Menú
+                                Principal</p>
                         </div>
                     </div>
-                    
+
                     <!-- User Info and Logout -->
                     <div class="flex items-center space-x-4">
                         <div class="text-right hidden md:block">
@@ -277,94 +361,126 @@
         <main class="flex-grow py-10 px-4 bg-gray-50">
             <div class="max-w-7xl mx-auto">
                 <h2 class="text-2xl font-bold text-gray-800 mb-8 text-center">Seleccione un Módulo</h2>
-                
+
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                    
+
                     <!-- Módulo Cuentas -->
-                    <div id="module-cuentas" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='cuentas.html'">
-                        <div class="bg-gradient-to-r from-purple-600 to-purple-800 p-6 flex justify-center items-center h-40">
+                    <div id="module-cuentas"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden"
+                        onclick="window.location.href='cuentas.html'">
+                        <div
+                            class="bg-gradient-to-r from-purple-600 to-purple-800 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-wallet text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Cuentas</h3>
-                            <p class="text-gray-600 text-sm mb-4">Gestión de cuentas de ahorro, créditos y movimientos financieros.</p>
+                            <p class="text-gray-600 text-sm mb-4">Gestión de cuentas de ahorro, créditos y movimientos
+                                financieros.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <span
+                                    class="text-xs font-semibold text-purple-600 bg-purple-100 px-2 py-1 rounded-full">Acceso
+                                    Permitido</span>
                                 <i class="fas fa-arrow-right text-gray-400"></i>
                             </div>
                         </div>
                     </div>
 
                     <!-- Módulo Pagarés -->
-                    <div id="module-pagares" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='pagares.html'">
-                        <div class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 flex justify-center items-center h-40">
+                    <div id="module-pagares"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden"
+                        onclick="window.location.href='pagares.html'">
+                        <div
+                            class="bg-gradient-to-r from-blue-600 to-blue-800 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-file-contract text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Pagarés</h3>
-                            <p class="text-gray-600 text-sm mb-4">Administración de documentos legales, pagarés y garantías.</p>
+                            <p class="text-gray-600 text-sm mb-4">Administración de documentos legales, pagarés y
+                                garantías.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo Admin</span>
+                                <span
+                                    class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo
+                                    Admin</span>
                                 <i class="fas fa-lock text-gray-400"></i>
                             </div>
                         </div>
                     </div>
 
                     <!-- Módulo Créditos -->
-                    <div id="module-creditos" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='creditos.html'">
-                        <div class="bg-gradient-to-r from-green-600 to-green-800 p-6 flex justify-center items-center h-40">
+                    <div id="module-creditos"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden"
+                        onclick="window.location.href='creditos.html'">
+                        <div
+                            class="bg-gradient-to-r from-green-600 to-green-800 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-hand-holding-usd text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Créditos</h3>
                             <p class="text-gray-600 text-sm mb-4">Gestión de solicitudes y aprobaciones de créditos.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <span
+                                    class="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">Acceso
+                                    Permitido</span>
                                 <i class="fas fa-arrow-right text-gray-400"></i>
                             </div>
                         </div>
                     </div>
 
                     <!-- Módulo Caja -->
-                    <div id="module-caja" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='caja.html'">
-                        <div class="bg-gradient-to-r from-orange-500 to-orange-700 p-6 flex justify-center items-center h-40">
+                    <div id="module-caja"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden"
+                        onclick="window.location.href='caja.html'">
+                        <div
+                            class="bg-gradient-to-r from-orange-500 to-orange-700 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-cash-register text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Caja</h3>
                             <p class="text-gray-600 text-sm mb-4">Utilidades de caja y consulta de valores de pago.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <span
+                                    class="text-xs font-semibold text-orange-600 bg-orange-100 px-2 py-1 rounded-full">Acceso
+                                    Permitido</span>
                                 <i class="fas fa-arrow-right text-gray-400"></i>
                             </div>
                         </div>
                     </div>
 
                     <!-- Módulo Ahorro Programado -->
-                    <div id="module-ahorro-programado" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden" onclick="window.location.href='ahorro_programado.html'">
-                        <div class="bg-gradient-to-r from-teal-500 to-teal-700 p-6 flex justify-center items-center h-40">
+                    <div id="module-ahorro-programado"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden"
+                        onclick="window.location.href='ahorro_programado.html'">
+                        <div
+                            class="bg-gradient-to-r from-teal-500 to-teal-700 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-piggy-bank text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Ahorro Programado</h3>
                             <p class="text-gray-600 text-sm mb-4">Gestión de ahorros programados y pólizas.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-teal-600 bg-teal-100 px-2 py-1 rounded-full">Acceso Permitido</span>
+                                <span
+                                    class="text-xs font-semibold text-teal-600 bg-teal-100 px-2 py-1 rounded-full">Acceso
+                                    Permitido</span>
                                 <i class="fas fa-arrow-right text-gray-400"></i>
                             </div>
                         </div>
                     </div>
 
                     <!-- Módulo Admin (Solo visible para admin) -->
-                    <div id="module-admin" class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden">
-                        <div class="bg-gradient-to-r from-gray-700 to-gray-900 p-6 flex justify-center items-center h-40">
+                    <div id="module-admin"
+                        class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 cursor-pointer hidden">
+                        <div
+                            class="bg-gradient-to-r from-gray-700 to-gray-900 p-6 flex justify-center items-center h-40">
                             <i class="fas fa-cogs text-6xl text-white opacity-90"></i>
                         </div>
                         <div class="p-6">
                             <h3 class="text-xl font-bold text-gray-800 mb-2">Administración</h3>
-                            <p class="text-gray-600 text-sm mb-4">Configuración del sistema, usuarios y permisos globales.</p>
+                            <p class="text-gray-600 text-sm mb-4">Configuración del sistema, usuarios y permisos
+                                globales.</p>
                             <div class="flex justify-between items-center">
-                                <span class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo Admin</span>
+                                <span
+                                    class="text-xs font-semibold text-gray-600 bg-gray-100 px-2 py-1 rounded-full">Solo
+                                    Admin</span>
                                 <i class="fas fa-lock text-gray-400"></i>
                             </div>
                         </div>
@@ -384,63 +500,71 @@
     <!-- Main JavaScript -->
     <script src="main.js"></script>
     <script>
+        // Esperar a que el sistema de autenticación esté listo
+        function initializeModules() {
+            // Verificar si el usuario está autenticado
+            if (!window.GestionAuth || !window.GestionAuth.isAuthenticated()) {
+                console.log('Usuario no autenticado, esperando redirección...');
+                return;
+            }
+
+            const hasCuentas = window.GestionAuth.checkAccess(['cuentas']);
+            const hasAsesor = window.GestionAuth.checkAccess(['asesor']);
+            const hasCaja = window.GestionAuth.checkAccess(['caja']);
+            const hasProgramado = window.GestionAuth.checkAccess(['programado']);
+            const hasPagares = window.GestionAuth.checkAccess(['pagares']);
+            const isAdmin = window.GestionAuth.checkAccess(['admin']);
+
+            const cuentasModule = document.getElementById('module-cuentas');
+            const pagaresModule = document.getElementById('module-pagares');
+            const creditosModule = document.getElementById('module-creditos');
+            const cajaModule = document.getElementById('module-caja');
+            const ahorroProgramadoModule = document.getElementById('module-ahorro-programado');
+            const adminModule = document.getElementById('module-admin');
+            const noModules = document.getElementById('no-modules');
+
+            let anyVisible = false;
+
+            if (hasCuentas || isAdmin) {
+                cuentasModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (hasPagares || isAdmin) {
+                pagaresModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (hasAsesor || isAdmin) {
+                creditosModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (hasCaja || isAdmin) {
+                cajaModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (hasProgramado || isAdmin) {
+                ahorroProgramadoModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (isAdmin) {
+                adminModule.classList.remove('hidden');
+                anyVisible = true;
+            }
+
+            if (!anyVisible) {
+                noModules.classList.remove('hidden');
+            }
+        }
+
+        // Esperar a que main.js termine de verificar autenticación
         document.addEventListener('DOMContentLoaded', () => {
-            // Esperar a que main.js inicialice
-            setTimeout(() => {
-                if (!window.GestionAuth.isAuthenticated()) return;
-
-                const hasCuentas = window.GestionAuth.checkAccess(['cuentas']);
-                const hasAsesor = window.GestionAuth.checkAccess(['asesor']);
-                const hasCaja = window.GestionAuth.checkAccess(['caja']);
-                const hasProgramado = window.GestionAuth.checkAccess(['programado']);
-                const hasPagares = window.GestionAuth.checkAccess(['pagares']);
-                const isAdmin = window.GestionAuth.checkAccess(['admin']);
-
-                const cuentasModule = document.getElementById('module-cuentas');
-                const pagaresModule = document.getElementById('module-pagares');
-                const creditosModule = document.getElementById('module-creditos');
-                const cajaModule = document.getElementById('module-caja');
-                const ahorroProgramadoModule = document.getElementById('module-ahorro-programado');
-                const adminModule = document.getElementById('module-admin');
-                const noModules = document.getElementById('no-modules');
-
-                let anyVisible = false;
-
-                if (hasCuentas || isAdmin) {
-                    cuentasModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (hasPagares || isAdmin) {
-                    pagaresModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (hasAsesor || isAdmin) {
-                    creditosModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (hasCaja || isAdmin) {
-                    cajaModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (hasProgramado || isAdmin) {
-                    ahorroProgramadoModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (isAdmin) {
-                    adminModule.classList.remove('hidden');
-                    anyVisible = true;
-                }
-
-                if (!anyVisible) {
-                    noModules.classList.remove('hidden');
-                }
-            }, 500);
+            setTimeout(initializeModules, 800);
         });
     </script>
 </body>
+
 </html>

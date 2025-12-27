@@ -1,6 +1,17 @@
 // ahorro_programado.js - Lógica del Módulo de Ahorro Programado
 (function () {
-    const db = window.GestionAuth.supabase();
+    // Obtener instancia de Supabase de forma segura (espera a que esté listo)
+    let db = null;
+
+    async function getDb() {
+        if (db && db.from) return db;
+        if (window.GestionSupabaseReady) {
+            db = await window.GestionSupabaseReady;
+        } else if (window.GestionSupabase) {
+            db = window.GestionSupabase;
+        }
+        return db;
+    }
 
     // Elementos del DOM
     const searchInput = document.getElementById('search-input');
@@ -65,7 +76,10 @@
 
     async function loadData() {
         try {
-            const { data, error } = await db
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
+            const { data, error } = await supabase
                 .from('programado_tr')
                 .select('*')
                 .order('created_at', { ascending: false });
@@ -350,10 +364,11 @@
 
         try {
             let result;
+            const supabase = await getDb();
 
             if (formId) {
                 // Actualizar registro existente
-                result = await db
+                result = await supabase
                     .from('programado_tr')
                     .update(formData)
                     .eq('id', parseInt(formId))
@@ -368,7 +383,7 @@
                 }
             } else {
                 // Insertar nuevo registro
-                result = await db
+                result = await supabase
                     .from('programado_tr')
                     .insert([formData])
                     .select();

@@ -1,7 +1,17 @@
 // creditos.js - Lógica del Módulo de Créditos
 (function () {
-    // Obtener instancia de Supabase desde main.js
-    const db = window.GestionAuth.supabase();
+    // Obtener instancia de Supabase de forma segura (espera a que esté listo)
+    let db = null;
+
+    async function getDb() {
+        if (db && db.from) return db;
+        if (window.GestionSupabaseReady) {
+            db = await window.GestionSupabaseReady;
+        } else if (window.GestionSupabase) {
+            db = window.GestionSupabase;
+        }
+        return db;
+    }
 
     // Estado local
     let creditosData = [];
@@ -75,13 +85,16 @@
     async function loadCreditos() {
         setLoadingTable(true);
         try {
+            const supabase = await getDb();
+            if (!supabase) throw new Error('Cliente Supabase no disponible');
+
             const user = window.GestionAuth.getUser();
             const userRoles = (localStorage.getItem('gestion_user_roles') || '').toLowerCase();
             const isAdmin = userRoles.includes('admin');
             const isAsesor = userRoles.includes('asesor');
             const isCreditos = userRoles.includes('creditos');
 
-            let query = db
+            let query = supabase
                 .from('actas_creditos_tupakra')
                 .select('*')
                 .order('fecha_hora', { ascending: false });
@@ -257,7 +270,8 @@
                     applyFilters();
                 }
 
-                const { error } = await db
+                const supabase = await getDb();
+                const { error } = await supabase
                     .from('actas_creditos_tupakra')
                     .update({ regularizado_cred: newStatus })
                     .eq('id', id);
